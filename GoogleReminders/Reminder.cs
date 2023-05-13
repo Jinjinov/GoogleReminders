@@ -18,5 +18,17 @@ namespace GoogleReminders
             CreationTimestampMsec = creationTimestampMsec;
             Done = done;
         }
+
+        public override string ToString()
+        {
+            if (Done)
+            {
+                return $"{Dt:yyyy.MM.dd} {Title} [Done]";
+            }
+            else
+            {
+                return $"{Dt:yyyy.MM.dd} {Title}";
+            }
+        }
     }
 }
