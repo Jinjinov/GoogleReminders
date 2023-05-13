@@ -1,17 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
 namespace GoogleReminders
 {
-    public class Reminders
+    public class Reminders : IReminders
     {
-        public string CreateReminderRequestBody(Reminder reminder)
+        readonly HttpClient httpClient;
+
+        public Reminders(HttpClient httpClient)
+        {
+            this.httpClient = httpClient;
+        }
+
+        private string CreateReminderRequestBody(Reminder reminder)
         {
             Dictionary<string, Dictionary<string, object>> body = new Dictionary<string, Dictionary<string, object>>
             {
@@ -24,7 +29,7 @@ namespace GoogleReminders
                 {
                     "3", new Dictionary<string, object>
                     {
-                        { "2", reminder.id }
+                        { "2", reminder.Id }
                     }
                 },
                 {
@@ -33,21 +38,21 @@ namespace GoogleReminders
                         {
                             "1", new Dictionary<string, object>
                             {
-                                { "2", reminder.id }
+                                { "2", reminder.Id }
                             }
                         },
-                        { "3", reminder.title },
+                        { "3", reminder.Title },
                         {
                             "5", new Dictionary<string, object>
                             {
-                                { "1", reminder.dt.Year },
-                                { "2", reminder.dt.Month },
-                                { "3", reminder.dt.Day },
+                                { "1", reminder.Dt.Year },
+                                { "2", reminder.Dt.Month },
+                                { "3", reminder.Dt.Day },
                                 { "4", new Dictionary<string, object>
                                     {
-                                        { "1", reminder.dt.Hour },
-                                        { "2", reminder.dt.Minute },
-                                        { "3", reminder.dt.Second }
+                                        { "1", reminder.Dt.Hour },
+                                        { "2", reminder.Dt.Minute },
+                                        { "3", reminder.Dt.Second }
                                     }
                                 }
                             }
@@ -60,7 +65,7 @@ namespace GoogleReminders
             return JsonSerializer.Serialize(body);
         }
 
-        public string GetReminderRequestBody(int reminderId)
+        private string GetReminderRequestBody(int reminderId)
         {
             Dictionary<string, List<Dictionary<string, int>>> body = new Dictionary<string, List<Dictionary<string, int>>>
             {
@@ -78,7 +83,7 @@ namespace GoogleReminders
             return JsonSerializer.Serialize(body);
         }
 
-        public string DeleteReminderRequestBody(int reminderId)
+        private string DeleteReminderRequestBody(int reminderId)
         {
             Dictionary<string, List<Dictionary<string, int>>> body = new Dictionary<string, List<Dictionary<string, int>>>
             {
@@ -96,7 +101,7 @@ namespace GoogleReminders
             return JsonSerializer.Serialize(body);
         }
 
-        public string ListReminderRequestBody(int numReminders, long maxTimestampMsec = 0)
+        private string ListReminderRequestBody(int numReminders, long maxTimestampMsec = 0)
         {
             /*
             The body corresponds to a request that retrieves a maximum of numReminders reminders, 
@@ -125,7 +130,7 @@ namespace GoogleReminders
             return JsonSerializer.Serialize(body);
         }
 
-        public Reminder? BuildReminder(Dictionary<string, dynamic> reminderDict)
+        private Reminder? BuildReminder(Dictionary<string, dynamic> reminderDict)
         {
             try
             {
@@ -159,20 +164,17 @@ namespace GoogleReminders
             }
         }
 
+        /// <summary>
+        /// Send a 'create reminder' request.
+        /// </summary>
+        /// <returns>True upon a successful creation of a reminder</returns>
         public async Task<bool> CreateReminder(string accessToken, Reminder reminder)
         {
-            /*
-            send a 'create reminder' request.
-            returns True upon a successful creation of a reminder
-            */
-
-            using HttpClient httpClient = new HttpClient();
-
             /*
             using HttpRequestMessage request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
-                RequestUri = new Uri("https://reminders-pa.clients6.google.com/v1internalOP/reminders/create" + "?access_token=" + accessToken),
+                RequestUri = new Uri($"https://reminders-pa.clients6.google.com/v1internalOP/reminders/create?access_token={accessToken}"),
                 Content = new StringContent(CreateReminderRequestBody(reminder), Encoding.UTF8, "application/json+protobuf")
             };
 
@@ -195,15 +197,12 @@ namespace GoogleReminders
             }
         }
 
+        /// <summary>
+        /// Retrieve information about the reminder with the given id.
+        /// </summary>
+        /// <returns>Null if an error occurred</returns>
         public async Task<Reminder?> GetReminder(string accessToken, int reminderId)
         {
-            /*
-            retrieve information about the reminder with the given id. 
-            Null if an error occurred
-            */
-
-            using HttpClient httpClient = new HttpClient();
-
             Uri requestUri = new Uri($"https://reminders-pa.clients6.google.com/v1internalOP/reminders/get?access_token={accessToken}");
             using StringContent httpContent = new StringContent(GetReminderRequestBody(reminderId), Encoding.UTF8, "application/json+protobuf");
 
@@ -231,15 +230,12 @@ namespace GoogleReminders
             }
         }
 
+        /// <summary>
+        /// Delete the reminder with the given id.
+        /// </summary>
+        /// <returns>True upon a successful deletion</returns>
         public async Task<bool> DeleteReminderAsync(string accessToken, int reminderId)
         {
-            /*
-            delete the reminder with the given id.
-            Returns True upon a successful deletion
-            */
-
-            using HttpClient httpClient = new HttpClient();
-
             Uri requestUri = new Uri($"https://reminders-pa.clients6.google.com/v1internalOP/reminders/delete?access_token={accessToken}");
             using StringContent requestContent = new StringContent(DeleteReminderRequestBody(reminderId), Encoding.UTF8, "application/json+protobuf");
 
@@ -256,15 +252,12 @@ namespace GoogleReminders
             }
         }
 
-        async Task<List<Reminder>?> ListReminders(string accessToken, int numReminders)
+        /// <summary>
+        /// Returns a list of the last numReminders created reminders
+        /// </summary>
+        /// <returns>null if an error occurred</returns>
+        public async Task<List<Reminder>?> ListReminders(string accessToken, int numReminders)
         {
-            /*
-            returns a list of the last numReminders created reminders, or
-            null if an error occurred
-            */
-
-            using HttpClient httpClient = new HttpClient();
-
             Uri requestUrl = new Uri($"https://reminders-pa.clients6.google.com/v1internalOP/reminders/list?access_token={accessToken}");
             using StringContent requestContent = new StringContent(ListReminderRequestBody(numReminders), Encoding.UTF8, "application/json+protobuf");
 
