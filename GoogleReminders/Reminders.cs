@@ -221,7 +221,7 @@ namespace GoogleReminders
                     return null;
                 }
 
-                var reminderDict = (Dictionary<string, dynamic>)reminders[0];
+                Dictionary<string, dynamic> reminderDict = (Dictionary<string, dynamic>)reminders[0];
 
                 return BuildReminder(reminderDict);
             }
@@ -283,7 +283,7 @@ namespace GoogleReminders
 
                 List<Reminder> reminders = new List<Reminder>();
 
-                foreach (var reminderObject in remindersArray)
+                foreach (object reminderObject in remindersArray)
                 {
                     if (!(reminderObject is Dictionary<string, dynamic> reminderDict))
                     {
