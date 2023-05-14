@@ -1,10 +1,35 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <Product>GoogleReminders</Product>
+    <PackageId>GoogleReminders</PackageId>
+    <PackageVersion>0.0.0.1</PackageVersion>
+    <Version>0.0.0.1</Version>
+    <Authors>Jinjinov</Authors>
+    <Description>Google Reminders .Net API</Description>
+    <Copyright>Copyright (c) Jinjinov 2022</Copyright>
+    <PackageProjectUrl>https://github.com/Jinjinov/GoogleReminders</PackageProjectUrl>
+    <!--<PackageIcon></PackageIcon>-->
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/Jinjinov/GoogleReminders.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>Google Reminders;API;NET Standard</PackageTags>
+    <!--<PackageReleaseNotes></PackageReleaseNotes>-->
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Text.Json" Version="7.0.2" />

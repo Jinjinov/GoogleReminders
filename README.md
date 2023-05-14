@@ -13,6 +13,24 @@ For instructions on how to get these values, see:
 
 https://developers.google.com/identity/protocols/OAuth2UserAgent
 
+## How to use:
+
+1. Include NuGet package from https://www.nuget.org/packages/GoogleReminders
+
+        <ItemGroup>
+            <PackageReference Include="GoogleReminders" Version="0.0.0.1" />
+        </ItemGroup>
+
+2. Add `builder.Services.AddScoped<IReminders,Reminders>();`
+
+## Version history:
+
+- 0.0.0.1
+    - `CreateReminder`
+    - `DeleteReminder`
+    - `GetReminder`
+    - `ListReminders`
+
 ---
 
 Related projects:
