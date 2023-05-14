@@ -65,7 +65,7 @@ namespace GoogleReminders
             return JsonSerializer.Serialize(body);
         }
 
-        private string GetReminderRequestBody(int reminderId)
+        private string DeleteReminderRequestBody(int reminderId)
         {
             Dictionary<string, List<Dictionary<string, int>>> body = new Dictionary<string, List<Dictionary<string, int>>>
             {
@@ -83,7 +83,7 @@ namespace GoogleReminders
             return JsonSerializer.Serialize(body);
         }
 
-        private string DeleteReminderRequestBody(int reminderId)
+        private string GetReminderRequestBody(int reminderId)
         {
             Dictionary<string, List<Dictionary<string, int>>> body = new Dictionary<string, List<Dictionary<string, int>>>
             {
@@ -204,6 +204,28 @@ namespace GoogleReminders
         }
 
         /// <summary>
+        /// Delete the reminder with the given id.
+        /// </summary>
+        /// <returns>True upon a successful deletion</returns>
+        public async Task<bool> DeleteReminder(string accessToken, int reminderId)
+        {
+            Uri requestUri = new Uri($"https://reminders-pa.clients6.google.com/v1internalOP/reminders/delete?access_token={accessToken}");
+            using StringContent requestContent = new StringContent(DeleteReminderRequestBody(reminderId), Encoding.UTF8, "application/json+protobuf");
+
+            using HttpResponseMessage response = await httpClient.PostAsync(requestUri, requestContent);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string content = await response.Content.ReadAsStringAsync();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Retrieve information about the reminder with the given id.
         /// </summary>
         /// <returns>Null if an error occurred</returns>
@@ -234,28 +256,6 @@ namespace GoogleReminders
             else
             {
                 return null;
-            }
-        }
-
-        /// <summary>
-        /// Delete the reminder with the given id.
-        /// </summary>
-        /// <returns>True upon a successful deletion</returns>
-        public async Task<bool> DeleteReminderAsync(string accessToken, int reminderId)
-        {
-            Uri requestUri = new Uri($"https://reminders-pa.clients6.google.com/v1internalOP/reminders/delete?access_token={accessToken}");
-            using StringContent requestContent = new StringContent(DeleteReminderRequestBody(reminderId), Encoding.UTF8, "application/json+protobuf");
-
-            using HttpResponseMessage response = await httpClient.PostAsync(requestUri, requestContent);
-
-            if (response.IsSuccessStatusCode)
-            {
-                string content = await response.Content.ReadAsStringAsync();
-                return true;
-            }
-            else
-            {
-                return false;
             }
         }
 
