@@ -5,9 +5,9 @@
 @inject NavigationManager navigationManager
 @inject IReminders googleReminders
 
-<h1>Hello, world!</h1>
+<h1>Reminders:</h1>
 
-<div>@innerHTML</div>
+<div>@((MarkupString)innerHTML)</div>
 
 @code {
     private const string YOUR_CLIENT_ID = "REPLACE_THIS_VALUE";

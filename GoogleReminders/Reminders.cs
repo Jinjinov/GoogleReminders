@@ -130,30 +130,36 @@ namespace GoogleReminders
             return JsonSerializer.Serialize(body);
         }
 
-        private Reminder? BuildReminder(Dictionary<string, dynamic> reminderDict)
+        private Reminder? BuildReminder(JsonElement reminderElement)
         {
             try
             {
-                int id = reminderDict["1"]["2"];
-                string title = reminderDict["3"];
+                string id = reminderElement.GetProperty("1").GetProperty("2").GetString() ?? throw new ArgumentNullException();
+                string title = reminderElement.GetProperty("3").GetString() ?? id;
 
-                int year = reminderDict["5"]["1"];
-                int month = reminderDict["5"]["2"];
-                int day = reminderDict["5"]["3"];
+                JsonElement dateElement = reminderElement.GetProperty("5");
+
+                int year = dateElement.GetProperty("1").GetInt32();
+                int month = dateElement.GetProperty("2").GetInt32();
+                int day = dateElement.GetProperty("3").GetInt32();
 
                 DateTime dateTime = new DateTime(year, month, day);
 
-                if (reminderDict["5"].ContainsKey("4"))
+                if (dateElement.TryGetProperty("4", out JsonElement timeElement))
                 {
-                    int hour = reminderDict["5"]["4"]["1"];
-                    int minute = reminderDict["5"]["4"]["2"];
-                    int second = reminderDict["5"]["4"]["3"];
+                    int hour = timeElement.GetProperty("1").GetInt32();
+                    int minute = timeElement.GetProperty("2").GetInt32();
+                    int second = timeElement.GetProperty("3").GetInt32();
 
                     dateTime = dateTime.AddHours(hour).AddMinutes(minute).AddSeconds(second);
                 }
 
-                int? creationTimestampMsec = reminderDict.ContainsKey("18") ? reminderDict["18"] : null;
-                bool done = reminderDict.ContainsKey("8") && reminderDict["8"] == 1;
+                long? creationTimestampMsec = null;
+
+                if (reminderElement.TryGetProperty("18", out JsonElement creationTimestampElement) && long.TryParse(creationTimestampElement.GetString(), out long timestamp))
+                    creationTimestampMsec = timestamp;
+
+                bool done = reminderElement.TryGetProperty("8", out JsonElement doneElement) && doneElement.GetInt32() == 1;
 
                 return new Reminder(id, title, dateTime, creationTimestampMsec, done);
             }
@@ -212,17 +218,18 @@ namespace GoogleReminders
             {
                 string content = await response.Content.ReadAsStringAsync();
 
-                Dictionary<string, object>? contentDict = JsonSerializer.Deserialize<Dictionary<string, object>>(content);
+                JsonDocument contentDoc = JsonDocument.Parse(content);
+                JsonElement contentRoot = contentDoc.RootElement;
 
-                if (contentDict == null || !contentDict.TryGetValue("1", out object remindersObj) || !(remindersObj is object[] reminders) || reminders.Length == 0)
+                if (!contentRoot.TryGetProperty("1", out JsonElement remindersElement) || remindersElement.GetArrayLength() == 0)
                 {
                     Console.WriteLine($"Couldn't find reminder with id={reminderId}");
                     return null;
                 }
 
-                Dictionary<string, dynamic> reminderDict = (Dictionary<string, dynamic>)reminders[0];
+                JsonElement reminderElement = remindersElement[0];
 
-                return BuildReminder(reminderDict);
+                return BuildReminder(reminderElement);
             }
             else
             {
@@ -267,23 +274,19 @@ namespace GoogleReminders
             {
                 string content = await response.Content.ReadAsStringAsync();
 
-                Dictionary<string, object>? contentDict = JsonSerializer.Deserialize<Dictionary<string, object>>(content);
+                JsonDocument contentDoc = JsonDocument.Parse(content);
+                JsonElement contentRoot = contentDoc.RootElement;
 
-                if (contentDict == null || !contentDict.TryGetValue("1", out object remindersObj) || !(remindersObj is object[] remindersArray) || remindersArray.Length == 0)
+                if (!contentRoot.TryGetProperty("1", out JsonElement remindersElement) || remindersElement.GetArrayLength() == 0)
                 {
                     return new List<Reminder>();
                 }
 
                 List<Reminder> reminders = new List<Reminder>();
 
-                foreach (object reminderObject in remindersArray)
+                foreach (JsonElement reminderElement in remindersElement.EnumerateArray())
                 {
-                    if (!(reminderObject is Dictionary<string, dynamic> reminderDict))
-                    {
-                        continue;
-                    }
-
-                    Reminder? reminder = BuildReminder(reminderDict);
+                    Reminder? reminder = BuildReminder(reminderElement);
 
                     if (reminder != null)
                         reminders.Add(reminder);
