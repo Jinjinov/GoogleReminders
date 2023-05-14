@@ -40,11 +40,11 @@
     {
         if (oauth2Params != null && oauth2Params.TryGetValue("access_token", out string? accessToken))
         {
-            var reminders = await googleReminders.ListReminders(accessToken, 10);
+            List<Reminder>? reminders = await googleReminders.ListReminders(accessToken, 10);
 
             if (reminders != null)
             {
-                foreach (var reminder in reminders)
+                foreach (Reminder reminder in reminders)
                 {
                     innerHTML += "<p>" + reminder + "</p>";
                 }

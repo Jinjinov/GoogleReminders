@@ -65,14 +65,14 @@ namespace GoogleReminders
             return JsonSerializer.Serialize(body);
         }
 
-        private string DeleteReminderRequestBody(int reminderId)
+        private string DeleteReminderRequestBody(string reminderId)
         {
-            Dictionary<string, List<Dictionary<string, int>>> body = new Dictionary<string, List<Dictionary<string, int>>>
+            Dictionary<string, List<Dictionary<string, string>>> body = new Dictionary<string, List<Dictionary<string, string>>>
             {
                 {
-                    "2", new List<Dictionary<string, int>>
+                    "2", new List<Dictionary<string, string>>
                     {
-                        new Dictionary<string, int>
+                        new Dictionary<string, string>
                         {
                             { "2", reminderId }
                         }
@@ -83,14 +83,14 @@ namespace GoogleReminders
             return JsonSerializer.Serialize(body);
         }
 
-        private string GetReminderRequestBody(int reminderId)
+        private string GetReminderRequestBody(string reminderId)
         {
-            Dictionary<string, List<Dictionary<string, int>>> body = new Dictionary<string, List<Dictionary<string, int>>>
+            Dictionary<string, List<Dictionary<string, string>>> body = new Dictionary<string, List<Dictionary<string, string>>>
             {
                 {
-                    "2", new List<Dictionary<string, int>>
+                    "2", new List<Dictionary<string, string>>
                     {
-                        new Dictionary<string, int>
+                        new Dictionary<string, string>
                         {
                             { "2", reminderId }
                         }
@@ -165,7 +165,6 @@ namespace GoogleReminders
             }
             catch (KeyNotFoundException)
             {
-                Console.WriteLine("BuildReminder failed: unrecognized reminder dictionary format");
                 return null;
             }
         }
@@ -207,7 +206,7 @@ namespace GoogleReminders
         /// Delete the reminder with the given id.
         /// </summary>
         /// <returns>True upon a successful deletion</returns>
-        public async Task<bool> DeleteReminder(string accessToken, int reminderId)
+        public async Task<bool> DeleteReminder(string accessToken, string reminderId)
         {
             Uri requestUri = new Uri($"https://reminders-pa.clients6.google.com/v1internalOP/reminders/delete?access_token={accessToken}");
             using StringContent requestContent = new StringContent(DeleteReminderRequestBody(reminderId), Encoding.UTF8, "application/json+protobuf");
@@ -229,7 +228,7 @@ namespace GoogleReminders
         /// Retrieve information about the reminder with the given id.
         /// </summary>
         /// <returns>Null if an error occurred</returns>
-        public async Task<Reminder?> GetReminder(string accessToken, int reminderId)
+        public async Task<Reminder?> GetReminder(string accessToken, string reminderId)
         {
             Uri requestUri = new Uri($"https://reminders-pa.clients6.google.com/v1internalOP/reminders/get?access_token={accessToken}");
             using StringContent httpContent = new StringContent(GetReminderRequestBody(reminderId), Encoding.UTF8, "application/json+protobuf");
@@ -245,7 +244,6 @@ namespace GoogleReminders
 
                 if (!contentRoot.TryGetProperty("1", out JsonElement remindersElement) || remindersElement.GetArrayLength() == 0)
                 {
-                    Console.WriteLine($"Couldn't find reminder with id={reminderId}");
                     return null;
                 }
 

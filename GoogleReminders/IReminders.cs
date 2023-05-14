@@ -15,13 +15,13 @@ namespace GoogleReminders
         /// Delete the reminder with the given id.
         /// </summary>
         /// <returns>True upon a successful deletion</returns>
-        Task<bool> DeleteReminder(string accessToken, int reminderId);
+        Task<bool> DeleteReminder(string accessToken, string reminderId);
 
         /// <summary>
         /// Retrieve information about the reminder with the given id.
         /// </summary>
         /// <returns>Null if an error occurred</returns>
-        Task<Reminder?> GetReminder(string accessToken, int reminderId);
+        Task<Reminder?> GetReminder(string accessToken, string reminderId);
 
         /// <summary>
         /// Returns a list of the last numReminders created reminders
