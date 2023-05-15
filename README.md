@@ -60,8 +60,8 @@ https://developers.google.com/identity/protocols/OAuth2UserAgent
                     }
                 }
 
-                    await SendRequest();
-                }
+                await SendRequest();
+            }
 
             async Task SendRequest()
             {
